@@ -1,0 +1,13 @@
+server {
+    listen                           80;
+    listen                      [::]:80;      
+    server_name  app2.dexter.com.br;
+        
+    access_log /var/log/nginx/app2.dexter.com.br-access.log;
+    error_log /var/log/nginx/app2.dexter.com.br-error.log;
+
+    location / {
+        proxy_pass                            http://10.128.0.50:7002;
+    }
+}
+

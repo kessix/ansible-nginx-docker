@@ -1,0 +1,90 @@
+- hosts: host
+  become: yes
+  tasks:
+  - name: "apt-get update"
+    apt:
+      update_cache: yes
+
+  - name: "install nginx"
+    apt:
+      name: ['nginx']
+      state: latest
+
+  - name: copy nginx app1.dexter.com.br
+    copy:
+      src: ./virtualhosts/app1.dexter.com.br
+      dest: /etc/nginx/sites-available/
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: copy nginx app2.dexter.com.br
+    copy:
+      src: ./virtualhosts/app2.dexter.com.br
+      dest: /etc/nginx/sites-available/
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: copy nginx app3.dexter.com.br
+    copy:
+      src: ./virtualhosts/app3.dexter.com.br
+      dest: /etc/nginx/sites-available/
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: restart nginx
+    service:
+      name: nginx
+      state: restarted  
+
+  - name: install packages apt support HTTPS
+    apt:
+      name: "{{item}}"
+      state: present
+      update_cache: yes
+    loop:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+  
+  - name: Add Docker’s official GPG key
+    apt_key:
+      url: https://download.docker.com/linux/debian/gpg
+      state: present
+  
+  - name: add docker official repository for Debian buster
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/debian buster stable
+      state: present
+  
+  - name: Index new repo into the cache
+    become: yes
+    apt:
+      name: "*"
+      state: latest
+      update_cache: yes
+      force_apt_get: yes
+  
+  - name: install docker
+    apt:
+      name: "docker-ce"
+      state: latest
+
+  - name: Enableb docker
+    service:
+      name: nginx
+      state: started
+
+  - name: Start docker
+    service:
+      name: docker
+      state: started
+
+  - name: Install docker-compose
+    get_url: 
+      url : https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-Linux-x86_64
+      dest: /usr/local/bin/docker-compose
+      mode: 'u+x,g+x'
